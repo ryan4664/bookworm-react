@@ -13,20 +13,20 @@ const Profile = () => {
     //   const test = fetch
     // };
 
-    const getToken = async () => {
-      const token = await getTokenSilently();
+    // const getToken = async () => {
+    //   const token = await getTokenSilently();
 
-      const response = await fetch("https://localhost:44350/books/1", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      const responseData = await response.json();
+    //   const response = await fetch("https://localhost:44350/books/1", {
+    //     headers: {
+    //       Authorization: `Bearer ${token}`
+    //     }
+    //   });
+    //   const responseData = await response.json();
 
-      console.log(responseData);
-    };
+    //   console.log(responseData);
+    // };
 
-    getToken();
+    // getToken();
     console.log(user);
   }, [user]);
 
