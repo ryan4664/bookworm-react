@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Loading from "../components/Loading";
 import { useAuth0 } from "../react-auth0-spa";
 import { Formik } from "formik";
 import { object, string } from "yup";
 import { IBook } from "../constants";
+import BookCard from "../components/BookCard";
 
 interface IForm {
   title: string;
@@ -13,15 +14,41 @@ interface IForm {
 }
 
 const Books = () => {
-  const { loading, user, getTokenSilently } = useAuth0();
+  const { loading: isLoadingUser, user, getTokenSilently } = useAuth0();
+  const [isLoadingBooks, setIsLoadingBooks] = useState<boolean>(true);
+  const [books, setBooks] = useState<IBook[]>([]);
 
   useEffect(() => {
-    console.log(user);
+    const getBooksByUserID = async () => {
+      setIsLoadingBooks(true);
+      const token = await getTokenSilently();
+      const response = await fetch(
+        `https://localhost:44350/books/user/${user.sub}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        const responseData = await response.json();
+        setBooks(responseData);
+      }
+      setIsLoadingBooks(false);
+    };
+
+    if (user) {
+      getBooksByUserID();
+    }
   }, [user]);
 
-  if (loading || !user) {
-    return <Loading />;
-  }
+  useEffect(() => {
+    console.log(books);
+  }, [books]);
 
   const saveBook = async (values: IForm) => {
     let newBook: IBook = {
@@ -31,13 +58,7 @@ const Books = () => {
       numberOfPages: values.numberOfPages ? +values.numberOfPages : undefined,
       authors: values?.authors?.split(",") ?? [],
     };
-
-    console.log("newBook", newBook);
-
     const token = await getTokenSilently();
-
-    console.log("token", token);
-
     const response = await fetch("https://localhost:44350/books", {
       method: "POST",
       headers: {
@@ -50,26 +71,6 @@ const Books = () => {
     console.log("response", response);
   };
 
-  // const getToken = async () => {
-  //   let token = await getIdTokenClaims();
-  //   console.log(token)`
-
-  //   const test = fetch
-  // };
-
-  // const getToken = async () => {
-  //   const token = await getTokenSilently();
-
-  //   const response = await fetch("https://localhost:44350/books/1", {
-  //     headers: {
-  //       Authorization: `Bearer ${token}`
-  //     }
-  //   });
-  //   const responseData = await response.json();
-
-  //   console.log(responseData);
-  // };
-
   const initialValues: IForm = {
     title: "Test Book",
     isbn: "123456789",
@@ -79,6 +80,20 @@ const Books = () => {
 
   return (
     <div className="container mb-5">
+      {isLoadingBooks || isLoadingUser ? (
+        <Loading />
+      ) : (
+        <>
+          {books.map((x) => (
+            <div className="row" key={x.bookID}>
+              <div className="col-12">
+                <BookCard book={x} />
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
       <div className="row align-items-center profile-header mb-5 text-center text-md-left">
         <p>hello {user.nickname}</p>
         <div className="row">
