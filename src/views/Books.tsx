@@ -40,6 +40,25 @@ const Books = () => {
     setIsLoadingBooks(false);
   };
 
+  const deleteBook = async (bookID: string) => {
+    setIsLoadingBooks(true);
+    const token = await getTokenSilently();
+    const response = await fetch(`https://localhost:44350/books/${bookID}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+
+    if (response.status === 200) {
+      getBooksByUserID();
+    } else {
+      setIsLoadingBooks(false);
+    }
+  };
+
   const saveBook = async (newBook: IBook) => {
     newBook.userID = user.sub;
     //@ts-ignore
@@ -70,7 +89,10 @@ const Books = () => {
             {books.map((x) => (
               <div className="row" key={x.bookID}>
                 <div className="col-12">
-                  <BookCard book={x} />
+                  <BookCard
+                    book={x}
+                    deleteBook={(bookID: string) => deleteBook(bookID)}
+                  />
                 </div>
               </div>
             ))}
