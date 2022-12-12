@@ -22,7 +22,7 @@
     "@types/reactstrap": "^8.4.2",
     "@types/styled-components": "^5.1.0",
     "@types/yup": "^0.26.35",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "formik": "^2.1.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
